@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# labchess
 
-## Getting Started
+A lolchess-style competitive ladder for AI research organizations. Every org
+(labs, universities, companies) gets a rank, tier, and LP score derived from
+its recent publication activity on OpenAlex — papers in the last 12 months,
+citation impact, h-index, and top fields. It's a fully static Next.js site;
+there's no backend, database, or API server at request time.
 
-First, run the development server:
+## Data pipeline
+
+The leaderboard data lives in `data/*.json` and is checked into the repo, not
+fetched at runtime. A weekly GitHub Action
+(`.github/workflows/refresh-data.yml`, Mondays 06:00 UTC) runs `npm run
+refresh`, which queries the OpenAlex API, recomputes ranks/tiers/LP, and
+commits the updated JSON directly to `main`. Vercel picks up the push and
+auto-redeploys. You can also trigger a refresh manually from the Actions tab
+(`workflow_dispatch`).
+
+OpenAlex asks API consumers to send a contact email in the "polite pool" for
+better rate limits. Set it as a repo Actions variable:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+gh variable set OPENALEX_MAILTO --body you@example.com -R yurekami/labchess
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+This is optional — the refresh works without it — but recommended to avoid
+throttling on the weekly run.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Local development
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run dev      # dev server at localhost:3000
+npm test         # vitest unit/integration tests
+npm run build    # production build
+npm run refresh  # pull fresh data from OpenAlex into data/*.json
+npm run e2e      # playwright end-to-end tests
+```
 
-## Learn More
+## Methodology
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+See `/about` on the running site, or `specs/labchess-spec.md` in this repo,
+for how LP, tiers, and rank movement are calculated.
