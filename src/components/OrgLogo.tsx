@@ -12,7 +12,8 @@ export function OrgLogo({ name, logoUrl, homepage, size }: {
       <span
         className="inline-flex items-center justify-center rounded-full bg-[var(--border)] font-bold text-[var(--text-dim)]"
         style={{ width: size, height: size, fontSize: size * 0.45 }}
-        aria-hidden
+        role="img"
+        aria-label={name}
       >
         {name.charAt(0).toUpperCase()}
       </span>
