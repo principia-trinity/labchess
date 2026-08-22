@@ -73,6 +73,7 @@ export function MapView({ orgs }: { orgs: MapOrg[] }) {
 
   const projection = useMemo(() => makeProjection(region), [region]);
   const path = useMemo(() => geoPath(projection), [projection]);
+  const dPaths = useMemo(() => countries.features.map((f: any) => path(f)), [path]);
   const bubbles = useMemo(() => {
     const inRegion = region === 'global' ? orgs : orgs.filter((o) => o.region === region);
     return layoutBubbles([...inRegion].sort((a, b) => b.lp - a.lp).slice(0, MAP_CAP), projection);
@@ -105,10 +106,10 @@ export function MapView({ orgs }: { orgs: MapOrg[] }) {
       </div>
 
       <div className="starfield overflow-hidden rounded-xl border border-[var(--border)]">
-        <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="h-auto w-full cursor-grab" role="img" aria-label="Map of AI research organizations">
+        <svg ref={svgRef} viewBox={`0 0 ${W} ${H}`} className="h-auto w-full cursor-grab" role="group" aria-label="Map of AI research organizations">
           <g transform={transform.toString()}>
-            {countries.features.map((f: any, i: number) => (
-              <path key={i} d={path(f) ?? undefined} fill="#161c27" stroke="#232b38" strokeWidth={0.5 / transform.k} />
+            {dPaths.map((d: string | null, i: number) => (
+              <path key={i} d={d ?? undefined} fill="#161c27" stroke="#232b38" strokeWidth={0.5 / transform.k} />
             ))}
             {bubbles.map((b) => (
               <g
@@ -116,6 +117,8 @@ export function MapView({ orgs }: { orgs: MapOrg[] }) {
                 transform={`translate(${b.x},${b.y})`}
                 className="cursor-pointer"
                 tabIndex={0}
+                role="link"
+                aria-label={`${b.org.name}, rank ${b.org.rank}, ${b.org.lp} LP`}
                 onMouseEnter={() => setHover(b)}
                 onMouseLeave={() => setHover(null)}
                 onFocus={() => setHover(b)}
