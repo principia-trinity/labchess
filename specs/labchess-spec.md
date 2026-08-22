@@ -57,8 +57,12 @@ stats site.
   map and leaderboard. Assignment from OpenAlex `country_code`.
 - **LP formula** (documented on `/about`):
   `LP = papers_12mo × (1 + min(2yr_mean_citedness, 20) / 10)`, rounded.
-  `papers_12mo` = OpenAlex works count with AI concept `C154945302` and
-  publication date in the last 365 days, attributed via institution lineage.
+  `papers_12mo` = OpenAlex count of works of `type:article` whose
+  `primary_topic.subfield` is Artificial Intelligence (`subfields/1702`),
+  published in the last 365 days, attributed via institution lineage.
+  (Amended 2026-08-22: the original `concepts.id:C154945302` filter counted
+  auto-tagged datasets/specimen records, putting ministries and a fusion
+  institute on top of the ladder. Topics + type:article verified sane.)
   `2yr_mean_citedness` from the institution's `summary_stats`.
 - **Tiers by global rank** (fits the ~1000-org ladder): Challenger 1–10,
   Grandmaster 11–50, Master 51–150, Diamond 151–350, Platinum 351–600,
@@ -66,7 +70,8 @@ stats site.
   the global tier badge.
 - **Movement**: current global rank vs. previous snapshot's global rank
   (▲ n / ▼ n / — / NEW).
-- **Org discovery**: each refresh, group last-12-months AI works by
+- **Org discovery**: each refresh, group last-12-months AI articles
+  (`primary_topic.subfield.id:1702,type:article`) by
   `authorships.institutions.lineage` → take top ~1000 institutions by
   count; fetch institution details (name, geo lat/long, country, homepage,
   `image_url`, summary stats) for each; then compute LP.
