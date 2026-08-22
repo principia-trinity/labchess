@@ -1,14 +1,14 @@
 import type { Work } from './types';
 
 const BASE = 'https://api.openalex.org';
-export const AI_CONCEPT = 'C154945302';
+export const AI_FILTER = 'primary_topic.subfield.id:1702,type:article';
 
 function mailto(): string {
   const m = process.env.OPENALEX_MAILTO;
   return m ? `&mailto=${encodeURIComponent(m)}` : '';
 }
 
-export async function fetchJSON(url: string, tries = 4): Promise<any> {
+export async function fetchJSON(url: string, tries = 6): Promise<any> {
   for (let attempt = 0; ; attempt++) {
     const res: { ok: boolean; status: number; json: () => Promise<any> } = await fetch(url).catch((err) => {
       // network errors are retryable like 5xx
@@ -17,7 +17,7 @@ export async function fetchJSON(url: string, tries = 4): Promise<any> {
     if (res.ok) return res.json();
     const retryable = res.status === 429 || res.status >= 500;
     if (!retryable || attempt >= tries - 1) throw new Error(`HTTP ${res.status} for ${url}`);
-    await new Promise((r) => setTimeout(r, 1000 * 2 ** attempt));
+    await new Promise((r) => setTimeout(r, 2000 * 2 ** attempt));
   }
 }
 
@@ -27,7 +27,7 @@ export async function discoverOrgs(fromDate: string, slices: (string[] | null)[]
   const byId = new Map<string, number>();
   for (const slice of slices) {
     const cc = slice ? `,institutions.country_code:${slice.join('|')}` : '';
-    const url = `${BASE}/works?filter=concepts.id:${AI_CONCEPT},from_publication_date:${fromDate}${cc}&group_by=authorships.institutions.lineage&per_page=200${mailto()}`;
+    const url = `${BASE}/works?filter=${AI_FILTER},from_publication_date:${fromDate}${cc}&group_by=authorships.institutions.lineage&per_page=200${mailto()}`;
     const json = await fetchJSON(url);
     for (const g of json.group_by ?? []) {
       const id = String(g.key).split('/').pop() ?? '';
@@ -52,7 +52,7 @@ export async function fetchInstitutions(ids: string[]): Promise<any[]> {
 }
 
 export async function fetchTopWorks(orgId: string, fromDate: string): Promise<Work[]> {
-  const url = `${BASE}/works?filter=authorships.institutions.lineage:${orgId},concepts.id:${AI_CONCEPT},from_publication_date:${fromDate}&sort=cited_by_count:desc&per_page=10&select=id,title,publication_year,cited_by_count,doi${mailto()}`;
+  const url = `${BASE}/works?filter=authorships.institutions.lineage:${orgId},${AI_FILTER},from_publication_date:${fromDate}&sort=cited_by_count:desc&per_page=10&select=id,title,publication_year,cited_by_count,doi${mailto()}`;
   const json = await fetchJSON(url);
   return (json.results ?? []).map((w: any): Work => ({
     id: w.id,
