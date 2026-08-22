@@ -6,12 +6,14 @@ export type Tier = (typeof TIERS)[number];
 export const REGIONS = ['us', 'china', 'europe', 'uk', 'asia', 'other'] as const;
 export type Region = (typeof REGIONS)[number];
 
+const httpUrl = z.string().refine((u) => /^https?:\/\//.test(u), { message: 'must be http(s) URL' });
+
 export const WorkSchema = z.object({
   id: z.string(),
-  title: z.string(),
+  title: z.string().min(1),
   year: z.number().int(),
   citations: z.number().int().nonnegative(),
-  url: z.string().nullable(),
+  url: httpUrl.nullable(),
 });
 export type Work = z.infer<typeof WorkSchema>;
 
@@ -23,8 +25,8 @@ export const OrgSchema = z.object({
   region: z.enum(REGIONS),
   lat: z.number().nullable(),
   lng: z.number().nullable(),
-  homepage: z.string().nullable(),
-  logoUrl: z.string().nullable(),
+  homepage: httpUrl.nullable(),
+  logoUrl: httpUrl.nullable(),
   type: z.string().nullable(),
   papers12mo: z.number().int().nonnegative(),
   meanCitedness: z.number().nonnegative(),

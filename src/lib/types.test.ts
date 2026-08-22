@@ -26,6 +26,16 @@ describe('schemas', () => {
   test('bad id rejected', () => {
     expect(() => OrgSchema.parse({ ...validOrg, id: 'X123' })).toThrow();
   });
+  test('javascript: homepage rejected', () => {
+    expect(() => OrgSchema.parse({ ...validOrg, homepage: 'javascript:alert(1)' })).toThrow();
+  });
+  test('javascript: logoUrl rejected', () => {
+    expect(() => OrgSchema.parse({ ...validOrg, logoUrl: 'javascript:alert(1)' })).toThrow();
+  });
+  test('javascript: work url rejected', () => {
+    const o = { ...validOrg, topWorks: [{ ...validOrg.topWorks[0], url: 'javascript:alert(1)' }] };
+    expect(() => OrgSchema.parse(o)).toThrow();
+  });
   test('snapshot parses', () => {
     expect(SnapshotSchema.parse({ generatedAt: '2026-08-22T00:00:00Z', orgs: [validOrg] }).orgs).toHaveLength(1);
   });
