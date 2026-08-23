@@ -20,7 +20,7 @@ OpenAlex asks API consumers to send a contact email in the "polite pool" for
 better rate limits. Set it as a repo Actions variable:
 
 ```bash
-gh variable set OPENALEX_MAILTO --body you@example.com -R yurekami/labchess
+gh variable set OPENALEX_MAILTO --body you@example.com -R principia-trinity/labchess
 ```
 
 This is optional — the refresh works without it — but recommended to avoid
